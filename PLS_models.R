@@ -1,5 +1,5 @@
 #This file contians the code for both outcomes AMU and respiratory, changing the modle from plsRlm to plsR and 
-the outcome from Respiratory to AMU is needed to run selection for AMU; now it is set for counts of respiratory treatments 
+#the outcome from Respiratory to AMU is needed to run selection for AMU; now it is set for counts of respiratory treatments 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #________________Clear_code_for_dependent_PLS____________________
 rm(list=ls()) 
