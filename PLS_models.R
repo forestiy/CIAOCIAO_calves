@@ -1,7 +1,7 @@
 #This file contains the code for both outcomes AMU and respiratory, changing the model from plsRlm to plsR and 
 #the outcome from Respiratory to AMU is needed to run selection for AMU; now it is set for counts of respiratory treatments 
 
-#Power analysis is at the bottom oft
+#Power analysis is at the bottom (see Line 385)
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #________________Clear_code_for_dependent_PLS____________________
 rm(list=ls()) 
