@@ -387,7 +387,7 @@ PREDS_list<-c(PREDS_list,names(which.max(table(top_model))),table(top_model))
 #setting up bootstrap to identify significance of all the variables involved 
 n_rep<-1
 store_df<-NULL
-while(n_rep<2001){
+while(n_rep<1001){
   
   ndim<-21
   # with this functino we generate multivariate random variables usign the covariance structure of the observed data
@@ -577,3 +577,80 @@ store_df<-rbind(store_df,znfg)
 n_rep<-n_rep+1
 
 }
+
+
+
+#################################################################################################
+#Power analysis using permutations similar to Andreella, A., L. Finos, B. Scarpa, and M. Stocchero. 2020. Towards a power analysis for PLS-based methods 1–18.
+#but instead of using the scores of a fitted PLS o nthe orignal data to simulate the R2 under H1 we use directly the mvrnorm() function
+#################################################################################################
+
+
+#AMU
+Outcomes<-as.matrix(cbind(FDF$DDDA))
+
+Predictors<-as.matrix(cbind(FDF[,PREDS_list[[638]] ]))
+
+
+
+#permutatino test
+library(boot)
+library(car)
+S2_vec<-c()
+R2R_list<-NULL
+R2R_boot<-c()
+pow2<-0
+I<-1500
+for(o in 1:I){
+  N_t<-round.off(runif(1,36,249))
+  DF_boot<- mvrnorm(n=N_t,mu=colMeans(cbind(Outcomes,Predictors)),
+                    Sigma=cov(cbind(Outcomes,Predictors))) 
+  
+#DF_boot_n<-sample(c(1:N_t),N_t,replace=T)
+
+modpls_boot <- plsR(DF_boot[,1 ],verbose=F,
+                    DF_boot[,-1],scaleX = T, scaleY = T,nt=2)
+
+S1_vec<-c()
+R2R<-c()
+for(x in 1:500){
+  
+  permutations <- sample(c(1:N_t), N_t, replace=F)
+  
+  
+  modpls <- plsR(DF_boot[permutations,1 ],verbose=F,
+                 DF_boot[,-1],scaleX = T, scaleY = T,nt=2)
+  
+  S1<-ifelse(modpls$R2[2]>=modpls_boot$R2[2],1,0)
+  S1_vec<-append(S1_vec,S1)
+  R2R<-append(R2R,modpls$R2[2])
+  
+}
+R2R_list[[length(R2R_list)+1]]<-R2R
+#S2<-ifelse(modpls_boot$R2[2]>=R_S1,1,0)
+#S2_vec<-append(S2_vec,S2)
+R2R_boot<-append(R2R_boot,modpls_boot$R2[2])
+if(mean(S1_vec)<=0.025){
+  pow2<-pow2+1/I
+}
+print(o)
+}
+
+
+ggplot() +
+  geom_histogram(data=data.frame(R2 = unlist(R2R_list)),
+                 mapping=aes(x = R2,y = ..density..),binwidth = 0.01, 
+                 fill = "blue", color = "black", alpha = 0.5) +
+  geom_histogram(data=data.frame(R2R_boot),
+                 mapping=aes(x = R2R_boot,y = ..density..),binwidth = 0.01, 
+                 fill = "red", color = "black", alpha = 0.5) +
+  labs(x = "R2", y = "Frequency", title = "") +
+  theme(legend.position="right",panel.background = element_rect(fill = 'white'),
+        legend.text = element_text(face="bold", size=sizz),
+        legend.title = element_text(face="bold", size=sizz),
+        axis.text.x=element_text(angle=0,hjust=0.3,vjust=1,face="bold", size=sizz),
+        axis.text.y=element_text(face="bold", size=sizz),
+        axis.title.y = element_text(vjust=2,face="bold", size=sizz),
+        axis.title.x = element_text(vjust=0,face="bold", size=sizz),
+        panel.grid = element_line(colour = "#e3e3e3"))
+
